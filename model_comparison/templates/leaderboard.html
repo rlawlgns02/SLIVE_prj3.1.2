@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리더보드 - 모델 비교 시스템</title>
+    <link rel="stylesheet" href="/static/css/comparison.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>AI 모델 비교 시스템</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/datacollector">데이터 수집</a>
+                <a href="/leaderboard" class="active">리더보드</a>
+                <a href="/live">실시간 비교</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>모델 성능 리더보드</h2>
+            <p>여러 AI 모델의 학습 속도, 정확도, 추론 속도를 비교합니다</p>
+        </div>
+
+        <!-- 모델 학습 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>모델 학습</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label for="modelSelect">모델 선택</label>
+                        <select id="modelSelect" class="input">
+                            <option value="">모델 목록 불러오는 중...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="epochsInput">에포크 수</label>
+                        <input type="number" id="epochsInput" class="input" value="20" min="1" max="200">
+                    </div>
+                    <div class="form-group">
+                        <label for="batchSizeInput">배치 크기</label>
+                        <input type="number" id="batchSizeInput" class="input" value="32" min="8" max="128" step="8">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="learningRateInput">학습률</label>
+                    <input type="number" id="learningRateInput" class="input" value="0.001" min="0.0001" max="0.1" step="0.0001">
+                </div>
+
+                <button id="trainBtn" class="btn btn-primary btn-lg">학습 시작</button>
+            </div>
+        </div>
+
+        <!-- 학습 진행 상황 카드 -->
+        <div class="card" id="trainingProgressCard" style="display: none;">
+            <div class="card-header">
+                <h3>⏳ 학습 진행 상황</h3>
+            </div>
+            <div class="card-body">
+                <div class="progress-section">
+                    <div class="info-row">
+                        <span>Epoch:</span>
+                        <span id="epochText">0/0</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="trainingProgressBar" class="progress-bar"></div>
+                    </div>
+                    <div class="stats-grid-mini" style="margin-top: 15px;">
+                        <div class="stat-mini">
+                            <span class="stat-label">학습 정확도</span>
+                            <span class="stat-value" id="trainAccuracy">0%</span>
+                        </div>
+                        <div class="stat-mini">
+                            <span class="stat-label">검증 정확도</span>
+                            <span class="stat-value" id="valAccuracy">0%</span>
+                        </div>
+                        <div class="stat-mini">
+                            <span class="stat-label">학습 손실</span>
+                            <span class="stat-value" id="trainLoss">0</span>
+                        </div>
+                        <div class="stat-mini">
+                            <span class="stat-label">검증 손실</span>
+                            <span class="stat-value" id="valLoss">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 학습 로그 터미널 -->
+        <div class="card" id="trainingLogCard" style="display: none;">
+            <div class="card-header">
+                <h3>📝 학습 로그</h3>
+                <button id="clearLogBtn" class="btn btn-secondary btn-small">로그 지우기</button>
+            </div>
+            <div class="card-body">
+                <div class="terminal-window" id="trainingLog">
+                    <div class="terminal-line system">> 학습 준비 완료...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 실시간 학습 그래프 (독립된 섹션) -->
+        <div class="card" id="trainingGraphCard" style="display: none;">
+            <div class="card-header">
+                <h3>📈 실시간 학습 그래프</h3>
+                <div class="btn-group">
+                    <button id="downloadAccuracyBtn" class="btn btn-secondary" style="display: none;">
+                        <span>📊</span> 정확도 그래프 저장
+                    </button>
+                    <button id="downloadLossBtn" class="btn btn-secondary" style="display: none;">
+                        <span>📉</span> 손실 그래프 저장
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="margin-bottom: 15px; text-align: center; color: #666;">정확도 (Accuracy)</h4>
+                        <canvas id="liveAccuracyChart"></canvas>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 15px; text-align: center; color: #666;">손실 (Loss)</h4>
+                        <canvas id="liveLossChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 성능 비교 차트 -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>정확도 비교</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="accuracyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>학습 시간 비교</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="trainTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>추론 속도 비교</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="inferenceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 컴퓨팅 자원 비교 차트 -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>메모리 사용량 비교</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="memoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>모델 크기 비교</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="modelSizeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>연산량 (FLOPs) 비교</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="flopsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 리더보드 테이블 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>리더보드</h3>
+                <div class="btn-group">
+                    <button id="refreshLeaderboard" class="btn btn-secondary">새로고침</button>
+                    <button id="clearLeaderboard" class="btn btn-danger">초기화</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-controls">
+                    <label>
+                        정렬 기준:
+                        <select id="sortBy" class="input">
+                            <option value="val_accuracy">검증 정확도</option>
+                            <option value="train_accuracy">학습 정확도</option>
+                            <option value="train_time">학습 시간</option>
+                            <option value="inference_time_ms">추론 속도</option>
+                        </select>
+                    </label>
+                    <label>
+                        정렬 순서:
+                        <select id="sortOrder" class="input">
+                            <option value="desc">내림차순</option>
+                            <option value="asc">오름차순</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="leaderboardTable" class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>모델명</th>
+                                <th>검증 정확도</th>
+                                <th>학습 정확도</th>
+                                <th>학습 시간</th>
+                                <th>평균 에포크 시간</th>
+                                <th>추론 속도</th>
+                                <th>파라미터 수</th>
+                                <th>모델 크기 (MB)</th>
+                                <th>피크 메모리 (MB)</th>
+                                <th>FLOPs (M)</th>
+                                <th>에포크</th>
+                                <th>배치 크기</th>
+                                <th>학습률</th>
+                                <th>샘플 수</th>
+                                <th>클래스 수</th>
+                                <th>시간</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardBody">
+                            <tr>
+                                <td colspan="15" class="text-center text-muted">데이터를 불러오는 중...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모델 상세 정보 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>사용 가능한 모델</h3>
+            </div>
+            <div class="card-body">
+                <div id="modelsInfo" class="models-info">
+                    <p class="text-muted">모델 정보를 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Script -->
+    <script src="/static/js/leaderboard.js"></script>
+</body>
+</html>

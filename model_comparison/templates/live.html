@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 모델 비교 - AI 모델 비교 시스템</title>
+    <link rel="stylesheet" href="/static/css/comparison.css">
+    <link rel="stylesheet" href="/static/css/live.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>AI 모델 비교 시스템</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/datacollector">데이터 수집</a>
+                <a href="/leaderboard">리더보드</a>
+                <a href="/live" class="active">실시간 비교</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>실시간 모델 성능 비교</h2>
+            <p>모든 모델이 동시에 추론하여 성능을 실시간으로 비교합니다</p>
+        </div>
+
+        <!-- 모델 선택 및 시작 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>모델 선택 및 시작</h3>
+            </div>
+            <div class="card-body">
+                <div id="modelSelection" class="model-selection-grid">
+                    <p class="text-muted">사용 가능한 모델을 불러오는 중...</p>
+                </div>
+
+                <div class="btn-group mt-2">
+                    <button id="loadModelsBtn" class="btn btn-primary btn-lg" disabled>선택한 모델 로드</button>
+                    <button id="startLiveBtn" class="btn btn-success btn-lg" disabled>실시간 비교 시작</button>
+                    <button id="stopLiveBtn" class="btn btn-danger btn-lg" disabled>중지</button>
+                </div>
+
+                <div id="loadingStatus" class="loading-status" style="display: none;">
+                    <p>모델 로딩 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 웹캠 및 실시간 리더보드 -->
+        <div class="grid-2">
+            <!-- 웹캠 영역 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>웹캠 입력</h3>
+                    <span id="fpsCounter" class="fps-counter">0 FPS</span>
+                </div>
+                <div class="card-body">
+                    <div class="video-container">
+                        <video id="webcam" autoplay playsinline></video>
+                        <canvas id="canvas"></canvas>
+                    </div>
+                    <div class="status-bar">
+                        <span id="cameraStatus" class="status-badge status-inactive">카메라 꺼짐</span>
+                        <span id="handsStatus" class="status-badge status-inactive">손 미감지</span>
+                        <span id="inferenceStatus" class="status-badge status-inactive">대기 중</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 실시간 성능 리더보드 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>실시간 성능 리더보드</h3>
+                </div>
+                <div class="card-body">
+                    <div id="performanceLeaderboard" class="performance-leaderboard">
+                        <p class="text-muted">모델을 로드하고 실시간 비교를 시작하세요.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 각 모델별 상세 결과 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>모델별 상세 결과</h3>
+            </div>
+            <div class="card-body">
+                <div id="modelResults" class="model-results-grid">
+                    <p class="text-muted">실시간 비교를 시작하면 각 모델의 예측 결과가 표시됩니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 통합 통계 -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>평균 추론 속도</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="speedChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>평균 신뢰도</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="confidenceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MediaPipe Hands -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Custom Script -->
+    <script src="/static/js/live.js"></script>
+</body>
+</html>

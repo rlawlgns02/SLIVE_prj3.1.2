@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데이터 수집 - 모델 비교 시스템</title>
+    <link rel="stylesheet" href="/static/css/comparison.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>AI 모델 비교 시스템</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/datacollector" class="active">데이터 수집</a>
+                <a href="/leaderboard">리더보드</a>
+                <a href="/live">실시간 비교</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>웹캠 데이터 수집</h2>
+            <p>여러 모델을 학습시킬 손 동작 데이터를 수집합니다</p>
+        </div>
+
+        <div class="grid-2">
+            <!-- 웹캠 영역 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>웹캠 입력</h3>
+                    <button id="toggleCamera" class="btn btn-primary">카메라 시작</button>
+                </div>
+                <div class="card-body">
+                    <div class="video-container">
+                        <video id="webcam" autoplay playsinline></video>
+                        <canvas id="canvas"></canvas>
+                    </div>
+                    <div class="status-bar">
+                        <span id="cameraStatus" class="status-badge status-inactive">카메라 꺼짐</span>
+                        <span id="handsStatus" class="status-badge status-inactive">손 미감지</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 수집 제어 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>수집 제어</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="gestureName">제스처 이름</label>
+                        <input type="text" id="gestureName" class="input" placeholder="예: 안녕하세요">
+                    </div>
+
+                    <div class="form-group">
+                        <label>수집 설정</label>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">수집 모드</span>
+                                <select id="collectionMode" class="input">
+                                    <option value="manual">수동 (버튼)</option>
+                                    <option value="auto">자동 (연속)</option>
+                                </select>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">자동 간격</span>
+                                <input type="number" id="autoInterval" class="input" value="100" min="50" max="1000" step="50">
+                                <span class="info-value">ms</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button id="recordBtn" class="btn btn-success" disabled>
+                            <span id="recordIcon">●</span> 녹화 시작
+                        </button>
+                        <button id="saveBtn" class="btn btn-secondary" disabled>저장하기</button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="currentCount">0</div>
+                            <div class="stat-label">현재 제스처</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalCount">0</div>
+                            <div class="stat-label">전체 데이터</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 데이터 통계 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>수집된 데이터 통계</h3>
+                <button id="refreshStats" class="btn btn-secondary">새로고침</button>
+            </div>
+            <div class="card-body">
+                <div id="gestureStats" class="gesture-stats">
+                    <p class="text-muted">데이터를 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 데이터 관리 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>데이터 관리</h3>
+            </div>
+            <div class="card-body">
+                <div class="btn-group">
+                    <button id="exportData" class="btn btn-primary">데이터 내보내기</button>
+                    <button id="resetData" class="btn btn-danger">모든 데이터 초기화</button>
+                </div>
+                <p class="text-muted" style="margin-top: 1rem;">
+                    초기화 시 모든 수집된 데이터가 삭제됩니다. 주의하세요!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MediaPipe Hands -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+    <!-- Custom Script -->
+    <script src="/static/js/datacollector.js"></script>
+</body>
+</html>
